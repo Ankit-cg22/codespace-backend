@@ -1,9 +1,13 @@
 const handleMouseMove = (socket, value) => {
-    socket.broadcast.emit('mouse-move-broadcast' , value)
+    socket.to(value.roomId).emit('mouse-move-broadcast' , value)
 }
 
 const handleDraw = (socket, value) => {
-    socket.broadcast.emit('draw-broadcast' , value)
+    socket.to(value.roomId).emit('draw-broadcast' , value)
 }
 
-module.exports = {handleMouseMove , handleDraw}
+const handleClearCanvas = (socket , roomId) =>{
+    socket.to(roomId).emit('clear-canvas-broadcast')
+}
+
+module.exports = {handleMouseMove , handleDraw , handleClearCanvas}

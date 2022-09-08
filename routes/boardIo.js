@@ -1,4 +1,4 @@
-const {handleMouseMove , handleDraw} = require('../controllers/boardIo')
+const {handleMouseMove , handleDraw , handleClearCanvas} = require('../controllers/boardIo')
 
 module.exports = (io , socket) => {
 
@@ -9,6 +9,10 @@ module.exports = (io , socket) => {
 
     socket.on('draw-emit' , value => {
         handleDraw(socket , value)
+    })
+
+    socket.on('clear-canvas-emit', (roomId)=>{
+        handleClearCanvas(socket , roomId)
     })
 
 }
