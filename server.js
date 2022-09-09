@@ -27,6 +27,7 @@ const onConnection = (socket) => {
     boardIoHandler(io , socket)
     roomHandler(io  ,socket)
     socket.emit('connected')
+
 }
 
 io.on('connection' , onConnection )
