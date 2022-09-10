@@ -58,7 +58,7 @@ app.post('/compile' , (req , res)=>{
     })
     .catch(function(error){
         console.log(error.message)
-        res.status(500).json({message : "Server error"})
+        res.status(500).json({message : error.message})
     })
     
 })
