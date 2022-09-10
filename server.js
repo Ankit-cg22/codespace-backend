@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cors({origin:'*'}))
 const server = require('http').Server(app)
 
-const rooms = []    
+let rooms = []    
 
 const io = require('socket.io')(server , {
     cors : {
@@ -28,6 +28,14 @@ const onConnection = (socket) => {
     roomHandler(io  ,socket)
     socket.emit('connected')
 
+    socket.on('disconnect' , (reason)=>{
+        const curRooms = Array.from(io.sockets.adapter.rooms)
+   
+        const activeRooms = curRooms.filter(r => (r[1].size > 1 || !r[1].has(socket.id)))
+        const activeRoomsId = activeRooms.map(r => r[0])
+        rooms = activeRoomsId
+        
+    })
 }
 
 io.on('connection' , onConnection )
