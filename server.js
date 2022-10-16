@@ -4,13 +4,16 @@ require('dotenv').config()
 const axios = require('axios')
 const app = express() ;
 const {v4 } = require('uuid')
+const authRoutes = require('./routes/auth')
+const profilePageRoutes = require('./routes/profilePage')
 
 app.use(express.urlencoded({extended :  true}))
 app.use(express.json())
 app.use(cors({origin:'*'}))
 const server = require('http').Server(app)
-
-let rooms = []    
+// auth routes 
+app.use('/auth' , authRoutes);
+app.use('/profile-page', profilePageRoutes)
 
 const io = require('socket.io')(server , {
     cors : {
@@ -20,28 +23,45 @@ const io = require('socket.io')(server , {
 
 const editorIoHandler = require('./routes/editorIo')
 const boardIoHandler = require('./routes/boardIo')
-const roomHandler = require('./routes/room')
+const roomHandler = require('./routes/room');
+const pool = require('./db');
 
 const onConnection = (socket) => {
     editorIoHandler(io , socket)
     boardIoHandler(io , socket)
     roomHandler(io  ,socket)
     socket.emit('connected')
+    socket.on("disconnecting", async () => {
+        var socketRooms = Array.from(socket.rooms); 
+        // console.log(socket.rooms)
+        const rooms = io.of("/").adapter.rooms
+        socketRooms.map(async(sr)=>{ 
+            let sz = rooms.get(sr).size;
+            // console.log(sz)
+            
+            if(sz === 1)
+            {
+                try {
+                    await pool.query(
+                        'DELETE FROM rooms WHERE room_id = $1' ,
+                        [sr]
+                    )
+                } catch (error) {
+                    console.log(error.message)
+                }
+                
+                // console.log("deleted")
+            }
 
-    socket.on('disconnect' , (reason)=>{
-        const curRooms = Array.from(io.sockets.adapter.rooms)
-   
-        const activeRooms = curRooms.filter(r => (r[1].size > 1 || !r[1].has(socket.id)))
-        const activeRoomsId = activeRooms.map(r => r[0])
-        rooms = activeRoomsId
-        
-    })
+        })
+    });
+    
 }
 
 io.on('connection' , onConnection )
 
 app.get('/' , (req , res)=>{
-    res.send("Welcome to server !")
+    res.send("Welcome to codespace server !")
 })
 
 app.post('/compile' , (req , res)=>{
@@ -71,17 +91,27 @@ app.post('/compile' , (req , res)=>{
     
 })
 
-app.get('/createRoom' , (req , res)=>{
+app.get('/createRoom' , async (req , res)=>{
     const roomId = v4()
-    rooms.push(roomId);
+    
+    const newRoom = await pool.query(
+        'INSERT INTO rooms (room_id) values ($1) ' ,
+        [roomId]
+    )
+    console.log("created")
     res.status(200).json({roomId});
 
 })
 
-app.post('/join-room' , (req  , res)=>{
+app.post('/join-room' ,async (req  , res)=>{
     const roomId = req.body.roomId 
 
-    if(rooms.includes(roomId)) return res.status(200).json({roomId})
+    const rooms = await pool.query(
+        'SELECT * FROM rooms WHERE room_id = $1' ,
+        [roomId]
+    )
+    console.log(rooms.rowCount)
+    if(rooms.rowCount == 1 ) return res.status(200).json({roomId})
 
     res.status(404).json({message: "No such room"})
 })

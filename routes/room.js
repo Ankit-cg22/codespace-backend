@@ -5,5 +5,4 @@ module.exports = (io , socket) => {
         handleJoinRoom(io, socket , roomId , userId)
     })
 
-    
 }
