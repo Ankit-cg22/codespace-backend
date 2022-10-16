@@ -17,7 +17,8 @@ app.use('/profile-page', profilePageRoutes)
 
 const io = require('socket.io')(server , {
     cors : {
-        origin : '*',   
+        origin : '*', 
+        credentials: true  
     }
 })
 
