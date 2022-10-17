@@ -2,6 +2,7 @@ const editorIoHandler = require('../routes/editorIo')
 const boardIoHandler = require('../routes/boardIo')
 const roomHandler = require('../routes/room');
 const pool = require('../db');
+const checkIfValidUUID = require('../utils/uuidChecker')
 
 const onConnection = (io , socket) => {
     editorIoHandler(io , socket)
@@ -19,6 +20,7 @@ const onConnection = (io , socket) => {
             if(sz === 1)
             {
                 try {
+                    if(!checkIfValidUUID(sr))return 
                     await pool.query(
                         'DELETE FROM rooms WHERE room_id = $1' ,
                         [sr]
