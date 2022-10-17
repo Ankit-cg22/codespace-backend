@@ -30,5 +30,4 @@ app.use('/userAction' , userActionRoutes)
 app.get('/' , (req , res)=>res.send("Welcome to codespace backend."))
 
 const PORT = process.env.PORT || 8000 ;
-// app.listen(PORT , ()=>console.log(`Server running on http://localhost:${PORT} ... `))
 server.listen(PORT , ()=>console.log("running.."))
