@@ -2,11 +2,11 @@ const Pool = require('pg').Pool
 require('dotenv').config()
 
 const devConfig = {
-    user: process.env.PG_USER ,
-    password : process.env.PG_PASSWORD,
-    host : process.env.PG_HOST,
-    port : process.env.PG_PORT  ,
-    database : process.env.PG_DATABASE
+    user: process.env.PGUSER ,
+    password : process.env.PGPASSWORD,
+    host : process.env.PGHOST,
+    port : process.env.PGPORT  ,
+    database : process.env.PGDATABASE
 }
 
 const prodConfig ={
